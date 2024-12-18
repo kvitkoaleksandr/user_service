@@ -23,8 +23,8 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Entity
-@Table(name = "users")
+@Entity // указывает, что класс является сущностью, и его объекты будут сохранены в таблице базы данных.
+@Table(name = "users")// Аннотация задает имя таблицы, с которой будет связана эта сущность
 public class User {
 
     @Id
