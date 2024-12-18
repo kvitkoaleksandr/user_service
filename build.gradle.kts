@@ -6,6 +6,7 @@ plugins {
     id("org.jsonschema2pojo") version "1.2.1"
 }
 
+
 group = "faang.school"
 version = "1.0"
 java.sourceCompatibility = JavaVersion.VERSION_17

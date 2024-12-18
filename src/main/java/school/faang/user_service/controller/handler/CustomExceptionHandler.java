@@ -17,7 +17,7 @@ import java.util.List;
 
 @Slf4j
 @ControllerAdvice
-public class GlobalExceptionHandler {
+public class CustomExceptionHandler {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorDto> handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
         log.error("Method argument not valid exception", e);

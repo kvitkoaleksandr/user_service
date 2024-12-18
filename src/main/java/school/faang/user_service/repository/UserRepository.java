@@ -11,7 +11,8 @@ import java.util.stream.Stream;
 
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
-
+// Репозиторий UserRepository расширяет JpaRepository, что автоматически предоставляет
+// методы для работы с базой данных, такие как сохранение, обновление, удаление и поиск сущностей.
     @Query(nativeQuery = true, value = """
             SELECT COUNT(s.id) FROM users u
             JOIN user_skill us ON us.user_id = u.id
