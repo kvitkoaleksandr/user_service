@@ -21,4 +21,13 @@ public class SubscriptionController {
         }
         subscriptionService.followUser(followerId, followeeId);
     }
+
+    @DeleteMapping("/unfollow")
+    public void unfollowUser(@RequestParam long followerId, @RequestParam long followeeId) {
+        if (followerId == followeeId) {
+            throw new DataValidationException("Нельзя отписаться от самого себя!");
+        }
+        subscriptionService.unfollowUser(followerId, followeeId);
+    }
+
 }

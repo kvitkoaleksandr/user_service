@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import school.faang.user_service.exception.DataValidationException;
 import school.faang.user_service.repository.SubscriptionRepository;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
@@ -36,8 +37,41 @@ class SubscriptionServiceTest {
     void testFollowUserWhenSubscriptionExistsShouldThrowException() {
         when(subscriptionRepository.existsByFollowerIdAndFolloweeId(followerId, followeeId)).thenReturn(true);
 
-        assertThrows(DataValidationException.class, () -> subscriptionService.followUser(followerId, followeeId));
+        DataValidationException exception = assertThrows(DataValidationException.class,
+                () -> subscriptionService.followUser(followerId, followeeId)
+        );
+
+        assertEquals(
+                "Пользователь с ID " + followerId + " уже подписан на пользователя с ID " + followeeId,
+                exception.getMessage()
+        );
 
         verify(subscriptionRepository, never()).followUser(anyLong(), anyLong());
+    }
+
+    @Test
+    void testUnfollowUserWhenSubscriptionExistsShouldCallRepository() {
+        when(subscriptionRepository.existsByFollowerIdAndFolloweeId(followerId, followeeId)).thenReturn(true);
+
+        subscriptionRepository.unfollowUser(followerId, followeeId);
+
+        verify(subscriptionRepository, times(1)).unfollowUser(followerId, followeeId);
+    }
+
+    @Test
+    void testUnfollowUserWhenSubscriptionDoesNotExistShouldThrowException() {
+        when(subscriptionRepository.existsByFollowerIdAndFolloweeId(followerId, followeeId)).thenReturn(false);
+
+        DataValidationException exception = assertThrows(DataValidationException.class,
+                () -> subscriptionService.unfollowUser(followerId, followeeId)
+        );
+
+        assertEquals(
+                "Подписка не найдена. Нельзя отписаться от пользователя с ID " + followeeId +
+                        ", на которого вы не подписаны.",
+                exception.getMessage()
+        );
+
+        verify(subscriptionRepository, never()).unfollowUser(anyLong(), anyLong());
     }
 }
