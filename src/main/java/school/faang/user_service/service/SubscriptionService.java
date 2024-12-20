@@ -4,14 +4,22 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import school.faang.user_service.dto.filter.SubscriptionFilterDto;
+import school.faang.user_service.dto.subscription.SubscriptionDto;
+import school.faang.user_service.entity.User;
 import school.faang.user_service.exception.DataValidationException;
+import school.faang.user_service.mapper.SubscriptionMapper;
 import school.faang.user_service.repository.SubscriptionRepository;
+
+import java.util.List;
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class SubscriptionService {
     private final SubscriptionRepository subscriptionRepository;
+    private final SubscriptionMapper subscriptionMapper;
 
     @Transactional
     public void followUser(long followerId, long followeeId) {
@@ -40,5 +48,30 @@ public class SubscriptionService {
 
         subscriptionRepository.unfollowUser(followerId, followeeId);
         log.info("Пользователь с ID {} отписался от пользователя с ID {}", followerId, followeeId);
+    }
+
+    @Transactional
+    public List<SubscriptionDto> getFollowers(long followeeId, SubscriptionFilterDto filter) {
+        try (Stream<User> userStream = subscriptionRepository.findByFolloweeId(followeeId)) {
+
+            List<User> userList = userStream.toList();
+
+            if (userList.isEmpty()) {
+                log.warn("Попытка получить несуществующих подписчиков для followeeId={}", followeeId);
+                throw new DataValidationException("Подписчики не найдены");
+            }
+
+            return filterUsers(userList, filter);
+        }
+    }
+
+    private List<SubscriptionDto> filterUsers(List<User> userList, SubscriptionFilterDto filter) {
+        return userList.stream()
+                .filter(user -> filter.getNamePattern() == null || user.getUsername().contains(filter.getNamePattern()))
+                .filter(user -> filter.getEmailPattern() == null || user.getEmail().contains(filter.getEmailPattern()))
+                .filter(user -> filter.getCityPattern() == null || user.getCity().contains(filter.getCityPattern()))
+                .filter(user -> filter.getPhonePattern() == null || user.getPhone().contains(filter.getPhonePattern()))
+                .map(subscriptionMapper::toDto)
+                .toList();
     }
 }
