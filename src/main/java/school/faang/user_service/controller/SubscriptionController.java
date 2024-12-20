@@ -2,8 +2,12 @@ package school.faang.user_service.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+import school.faang.user_service.dto.filter.SubscriptionFilterDto;
+import school.faang.user_service.dto.subscription.SubscriptionDto;
 import school.faang.user_service.exception.DataValidationException;
 import school.faang.user_service.service.SubscriptionService;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -30,4 +34,11 @@ public class SubscriptionController {
         subscriptionService.unfollowUser(followerId, followeeId);
     }
 
+    @GetMapping("/getFollowers")
+    public List<SubscriptionDto> getFollowers(@RequestParam long followeeId, SubscriptionFilterDto filter) {
+        if (followeeId <= 0) {
+            throw new RuntimeException("Не корректное ID пользователя.");
+        }
+        return subscriptionService.getFollowers(followeeId, filter);
+    }
 }
