@@ -31,6 +31,7 @@ class SubscriptionServiceTest {
 
     private long followeeId;
     private long followerId;
+    private int expectedCount;
     private SubscriptionFilterDto filter;
     private User user;
     private SubscriptionDto subscriptionDto;
@@ -40,6 +41,8 @@ class SubscriptionServiceTest {
         MockitoAnnotations.openMocks(this);
         followerId = 2L;
         followeeId = 1L;
+
+        expectedCount = 5;
 
         user = new User();
         user.setId(1L);
@@ -133,5 +136,27 @@ class SubscriptionServiceTest {
 
         verify(subscriptionRepository, times(1)).findByFolloweeId(followeeId);
         verifyNoInteractions(subscriptionMapper);
+    }
+
+    @Test
+    void testGetFollowersCountShouldReturnCount() {
+        when(subscriptionRepository.findFollowersAmountByFolloweeId(followeeId)).thenReturn(expectedCount);
+
+        int actualCount = subscriptionService.getFollowersCount(followeeId);
+
+        assertEquals(expectedCount, actualCount);
+        verify(subscriptionRepository, times(1)).findFollowersAmountByFolloweeId(followeeId);
+    }
+
+    @Test
+    void testGetFollowersCountWhenNoFollowersShouldThrowException() {
+        when(subscriptionRepository.findFollowersAmountByFolloweeId(followeeId)).thenReturn(0);
+
+        DataValidationException exception = assertThrows(DataValidationException.class, () -> {
+            subscriptionService.getFollowersCount(followeeId);
+        });
+
+        assertEquals("Подписчики не найдены", exception.getMessage());
+        verify(subscriptionRepository, times(1)).findFollowersAmountByFolloweeId(followeeId);
     }
 }

@@ -23,6 +23,7 @@ public class SubscriptionController {
         if (followerId == followeeId) {
             throw new DataValidationException("Нельзя подписываться на самого себя!");
         }
+
         subscriptionService.followUser(followerId, followeeId);
     }
 
@@ -31,6 +32,7 @@ public class SubscriptionController {
         if (followerId == followeeId) {
             throw new DataValidationException("Нельзя отписаться от самого себя!");
         }
+
         subscriptionService.unfollowUser(followerId, followeeId);
     }
 
@@ -39,6 +41,16 @@ public class SubscriptionController {
         if (followeeId <= 0) {
             throw new RuntimeException("Не корректное ID пользователя.");
         }
+
         return subscriptionService.getFollowers(followeeId, filter);
+    }
+
+    @GetMapping("/getFollowersCount")
+    public int getFollowersCount(@RequestParam long followeeId) {
+        if(followeeId <= 0) {
+            throw new RuntimeException("Не корректный ID пользователя.");
+        }
+
+        return subscriptionService.getFollowersCount(followeeId);
     }
 }

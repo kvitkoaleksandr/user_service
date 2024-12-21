@@ -74,4 +74,15 @@ public class SubscriptionService {
                 .map(subscriptionMapper::toDto)
                 .toList();
     }
+
+    @Transactional
+    public int getFollowersCount(long followeeId) {
+        int count = subscriptionRepository.findFollowersAmountByFolloweeId(followeeId);
+        if (count == 0) {
+            log.warn("У пользователя с ID {}, нет подписчиков", followeeId);
+            throw new DataValidationException("Подписчики не найдены");
+        }
+
+        return count;
+    }
 }
