@@ -85,4 +85,18 @@ public class SubscriptionService {
 
         return count;
     }
+
+    @Transactional
+    public List<SubscriptionDto> getFollowing(long followerId, SubscriptionFilterDto filter) {
+        try (Stream<User> userStream = subscriptionRepository.findByFollowerId(followerId)) {
+            List<User> userList = userStream.toList();
+
+            if (userList.isEmpty()) {
+                log.warn("У пользователя с ID {} нет подписок", followerId);
+                throw new DataValidationException("Подписки не найдены");
+            }
+
+            return filterUsers(userList, filter);
+        }
+    }
 }

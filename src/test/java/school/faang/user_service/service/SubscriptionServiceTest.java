@@ -159,4 +159,51 @@ class SubscriptionServiceTest {
         assertEquals("Подписчики не найдены", exception.getMessage());
         verify(subscriptionRepository, times(1)).findFollowersAmountByFolloweeId(followeeId);
     }
+
+    @Test
+    void testGetFollowingShouldReturnFilteredSubscriptions() {
+        when(subscriptionRepository.findByFollowerId(followerId)).thenReturn(Stream.of(user));
+        when(subscriptionMapper.toDto(user)).thenReturn(subscriptionDto);
+
+        List<SubscriptionDto> result = subscriptionService.getFollowing(followerId, filter);
+
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        assertEquals(subscriptionDto, result.get(0));
+
+        verify(subscriptionRepository, times(1)).findByFollowerId(followerId);
+        verify(subscriptionMapper, times(1)).toDto(user);
+    }
+
+    @Test
+    void testGetFollowingWhenNoSubscriptionsShouldThrowException() {
+        when(subscriptionRepository.findByFollowerId(followerId)).thenReturn(Stream.empty());
+
+        DataValidationException exception = assertThrows(DataValidationException.class, () -> {
+            subscriptionService.getFollowing(followerId, filter);
+        });
+
+        assertEquals("Подписки не найдены", exception.getMessage());
+
+        verify(subscriptionRepository, times(1)).findByFollowerId(followerId);
+        verifyNoInteractions(subscriptionMapper);
+    }
+
+    @Test
+    void testGetFollowingWithFilterShouldReturnMatchingSubscriptions() {
+        filter.setCityPattern("exampleCity");
+        user.setCity("exampleCity");
+
+        when(subscriptionRepository.findByFollowerId(followerId)).thenReturn(Stream.of(user));
+        when(subscriptionMapper.toDto(user)).thenReturn(subscriptionDto);
+
+        List<SubscriptionDto> result = subscriptionService.getFollowing(followerId, filter);
+
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        assertEquals(subscriptionDto, result.get(0));
+
+        verify(subscriptionRepository, times(1)).findByFollowerId(followerId);
+        verify(subscriptionMapper, times(1)).toDto(user);
+    }
 }

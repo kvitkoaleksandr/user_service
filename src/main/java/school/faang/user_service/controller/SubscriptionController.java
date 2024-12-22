@@ -53,4 +53,13 @@ public class SubscriptionController {
 
         return subscriptionService.getFollowersCount(followeeId);
     }
+
+    @GetMapping("/getFollowing")
+    public List<SubscriptionDto> getFollowing(@RequestParam long followerId, SubscriptionFilterDto filter) {
+        if (followerId <= 0) {
+            throw new RuntimeException("Не корректное ID пользователя.");
+        }
+
+        return subscriptionService.getFollowing(followerId, filter);
+    }
 }
