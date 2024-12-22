@@ -99,4 +99,15 @@ public class SubscriptionService {
             return filterUsers(userList, filter);
         }
     }
+
+    @Transactional
+    public int getFollowingCount(long followerId) {
+        int count = subscriptionRepository.findFolloweesAmountByFollowerId(followerId);
+        if (count == 0) {
+            log.warn("У пользователя с ID {}, нет подписок", followerId);
+            throw new DataValidationException("Подписки не найдены");
+        }
+
+        return count;
+    }
 }
