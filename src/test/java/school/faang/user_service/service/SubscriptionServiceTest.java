@@ -206,4 +206,26 @@ class SubscriptionServiceTest {
         verify(subscriptionRepository, times(1)).findByFollowerId(followerId);
         verify(subscriptionMapper, times(1)).toDto(user);
     }
+
+    @Test
+    void testGetFollowingCountShouldReturnCount() {
+        when(subscriptionRepository.findFolloweesAmountByFollowerId(followerId)).thenReturn(expectedCount);
+
+        int actualCount = subscriptionService.getFollowingCount(followerId);
+
+        assertEquals(expectedCount, actualCount);
+        verify(subscriptionRepository, times(1)).findFolloweesAmountByFollowerId(followerId);
+    }
+
+    @Test
+    void testGetFollowingCountWhenNoSubscriptionsShouldThrowException() {
+        when(subscriptionRepository.findFolloweesAmountByFollowerId(followerId)).thenReturn(0);
+
+        DataValidationException exception = assertThrows(DataValidationException.class, () -> {
+            subscriptionService.getFollowingCount(followerId);
+        });
+
+        assertEquals("Подписки не найдены", exception.getMessage()); // Сообщение обновлено
+        verify(subscriptionRepository, times(1)).findFolloweesAmountByFollowerId(followerId);
+    }
 }
