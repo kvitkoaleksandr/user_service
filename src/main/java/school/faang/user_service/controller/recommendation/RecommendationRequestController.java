@@ -31,7 +31,7 @@ public class RecommendationRequestController {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Recommendation request created successfully"),
             @ApiResponse(responseCode = "400", description = "Invalid input data")
-    })
+    }) // Запросить рекомендацию
     public RecommendationRequestDto requestRecommendation(@RequestBody RecommendationRequestDto recommendationRequestDto) {
         if (recommendationRequestDto == null) {
             throw new RuntimeException("Empty request");
@@ -44,7 +44,7 @@ public class RecommendationRequestController {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "List of recommendation requests retrieved successfully"),
             @ApiResponse(responseCode = "400", description = "Invalid filter data")
-    })
+    }) // Получить запросы рекомендаций с фильтрами
     public List<RecommendationRequestDto> getRecommendationRequests(@RequestBody RequestFilterDto filter) {
         if (filter == null) {
             throw new RuntimeException("Empty filter");
@@ -57,7 +57,7 @@ public class RecommendationRequestController {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Recommendation request retrieved successfully"),
             @ApiResponse(responseCode = "404", description = "Recommendation request not found")
-    })
+    }) // Получить конкретный запрос на рекомендацию
     public RecommendationRequestDto getRecommendationRequest(@PathVariable @Parameter(description = "ID of the recommendation request") long id) {
         return service.getRequest(id);
     }
@@ -68,7 +68,7 @@ public class RecommendationRequestController {
             @ApiResponse(responseCode = "200", description = "Recommendation request rejected successfully"),
             @ApiResponse(responseCode = "400", description = "Invalid rejection details"),
             @ApiResponse(responseCode = "404", description = "Recommendation request not found")
-    })
+    }) // Отклонить запрос на рекомендацию
     public RecommendationRequestDto rejectRequest(
             @PathVariable @Parameter(description = "ID of the recommendation request") long id, @RequestBody RejectionDto rejection) {
         if (rejection == null || rejection.getReason().isBlank() || rejection.getReason().isEmpty()) {
