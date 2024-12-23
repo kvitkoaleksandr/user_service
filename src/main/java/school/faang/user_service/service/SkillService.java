@@ -36,7 +36,7 @@ public class SkillService {
     public SkillDto createSkill(SkillDto skillDto) {
         validateSkillDto(skillDto);
         if (skillRepository.existsByTitle(skillDto.getTitle())) {
-            throw new DataValidationException("Skill " + skillDto.getTitle() + " already exists");
+            throw new DataValidationException("Skill " + skillDto.getTitle() + " уже существует");
         }
         Skill skill = skillMapper.toEntity(skillDto);
         List<User> users = userRepository.findAllById(skillDto.getUserIds());
