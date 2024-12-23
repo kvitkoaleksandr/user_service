@@ -31,7 +31,7 @@ public class RecommendationController {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Recommendation created successfully"),
             @ApiResponse(responseCode = "400", description = "Invalid input data")
-    })
+    }) // Дать рекомендацию
     public RecommendationDto giveRecommendation(@RequestBody RecommendationDto recommendation) {
         return service.create(recommendation);
     }
@@ -41,7 +41,7 @@ public class RecommendationController {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Recommendation updated successfully"),
             @ApiResponse(responseCode = "404", description = "Recommendation not found")
-    })
+    }) // Обновить рекомендацию
     public RecommendationDto updateRecommendation(@RequestBody RecommendationDto updated) {
         return service.update(updated);
     }
@@ -51,7 +51,7 @@ public class RecommendationController {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Recommendation deleted successfully"),
             @ApiResponse(responseCode = "404", description = "Recommendation not found")
-    })
+    }) // Удалить рекомендацию
     public void deleteRecommendation(@PathVariable @Parameter(description = "ID of the recommendation to delete") Long recommendationId) {
         service.delete(recommendationId);
     }
@@ -62,7 +62,7 @@ public class RecommendationController {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "List of recommendations retrieved successfully"),
             @ApiResponse(responseCode = "404", description = "User not found")
-    })
+    }) // Получить все рекомендации пользователя
     public List<RecommendationDto> getAllUserRecommendations(@PathVariable @Parameter(description = "ID of the user receiving recommendations") Long receiverId) {
         return service.getAllUserRecommendations(receiverId);
     }
@@ -72,7 +72,7 @@ public class RecommendationController {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "List of recommendations retrieved successfully"),
             @ApiResponse(responseCode = "404", description = "Author not found")
-    })
+    }) // Получить все данные рекомендации
     public List<RecommendationDto> getAllGivenRecommendations(@PathVariable @Parameter(description = "ID of the author giving recommendations") Long authorId) {
         return service.getAllGivenRecommendations(authorId);
     }
