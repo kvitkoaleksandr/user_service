@@ -18,7 +18,7 @@ public class SubscriptionController {
 
     //followerId - id пользователя, который хочет подписаться
     //followeeId - id того, на кого хотят подписаться.
-    @PostMapping("/follow")
+    @PostMapping("/follow") // Подписаться на пользователя
     public void followUser(@RequestParam long followerId, @RequestParam long followeeId) {
         if (followerId == followeeId) {
             throw new DataValidationException("Нельзя подписываться на самого себя!");
@@ -27,7 +27,7 @@ public class SubscriptionController {
         subscriptionService.followUser(followerId, followeeId);
     }
 
-    @DeleteMapping("/unfollow")
+    @DeleteMapping("/unfollow") // Отписаться от пользователя
     public void unfollowUser(@RequestParam long followerId, @RequestParam long followeeId) {
         if (followerId == followeeId) {
             throw new DataValidationException("Нельзя отписаться от самого себя!");
@@ -36,7 +36,7 @@ public class SubscriptionController {
         subscriptionService.unfollowUser(followerId, followeeId);
     }
 
-    @GetMapping("/getFollowers")
+    @GetMapping("/getFollowers") // Получить всех подписчиков
     public List<SubscriptionDto> getFollowers(@RequestParam long followeeId, SubscriptionFilterDto filter) {
         if (followeeId <= 0) {
             throw new RuntimeException("Не корректное ID пользователя.");
@@ -45,7 +45,7 @@ public class SubscriptionController {
         return subscriptionService.getFollowers(followeeId, filter);
     }
 
-    @GetMapping("/getFollowersCount")
+    @GetMapping("/getFollowersCount") // Получить количество подписчиков
     public int getFollowersCount(@RequestParam long followeeId) {
         if (followeeId <= 0) {
             throw new RuntimeException("Не корректный ID пользователя.");
@@ -54,7 +54,7 @@ public class SubscriptionController {
         return subscriptionService.getFollowersCount(followeeId);
     }
 
-    @GetMapping("/getFollowing")
+    @GetMapping("/getFollowing") // Просмотреть свои подписки
     public List<SubscriptionDto> getFollowing(@RequestParam long followerId, SubscriptionFilterDto filter) {
         if (followerId <= 0) {
             throw new RuntimeException("Не корректное ID пользователя.");
@@ -63,7 +63,7 @@ public class SubscriptionController {
         return subscriptionService.getFollowing(followerId, filter);
     }
 
-    @GetMapping("/getFollowingCount")
+    @GetMapping("/getFollowingCount") // Получить количество своих подписок
     public int getFollowingCount(@RequestParam long followerId) {
         if (followerId <= 0) {
             throw new RuntimeException("Не корректный ID пользователя.");
