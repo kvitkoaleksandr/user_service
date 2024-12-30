@@ -21,26 +21,26 @@ import java.util.List;
 public class MentorshipController {
     private final MentorshipService mentorshipService;
 
-    @GetMapping("/mentees")
+    @GetMapping("/mentees") // Получить всех менти одного пользователя
     @Operation(summary = "Get mentees", description = "Retrieves a list of mentees for a given mentor.")
     public List<UserDto> getMentees(@RequestParam @Parameter(description = "ID of the mentor") long mentorId) {
         return mentorshipService.getMentees(mentorId);
     }
 
-    @GetMapping("/mentors")
+    @GetMapping("/mentors") // Получить всех менторов одного пользователя
     @Operation(summary = "Get mentors", description = "Retrieves a list of mentors for a given mentee.")
     public List<UserDto> getMentors(@RequestParam @Parameter(description = "ID of the mentee") long menteeId) {
         return mentorshipService.getMentors(menteeId);
     }
 
-    @DeleteMapping("/mentees")
+    @DeleteMapping("/mentees") // Удалить менти
     @Operation(summary = "Delete mentee", description = "Deletes a mentee from a mentor's list.")
     public void deleteMentee(@RequestParam @Parameter(description = "ID of the mentor") long mentorId,
                              @RequestParam @Parameter(description = "ID of the menеуу") long menteeId) {
         mentorshipService.deleteMentee(menteeId, mentorId);
     }
 
-    @DeleteMapping("/mentors")
+    @DeleteMapping("/mentors") // Удалить ментора
     @Operation(summary = "Delete mentor", description = "Deletes a mentor from a mentee's list.")
     public void deleteMentor(@RequestParam @Parameter(description = "ID of the mentee") long menteeId,
                              @RequestParam @Parameter(description = "ID of the mentor") long mentorId) {
