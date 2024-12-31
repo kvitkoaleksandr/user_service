@@ -7,6 +7,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import school.faang.user_service.dto.MentorshipRequestDto;
+import school.faang.user_service.dto.filter.MentorshipRequestFilterDto;
 import school.faang.user_service.entity.MentorshipRequest;
 import school.faang.user_service.entity.RequestStatus;
 import school.faang.user_service.entity.User;
@@ -15,6 +16,7 @@ import school.faang.user_service.repository.UserRepository;
 import school.faang.user_service.repository.mentorship.MentorshipRequestRepository;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -146,5 +148,139 @@ class MentorshipRequestServiceTest {
 
         assertEquals("Запрос уже обработан.", exception.getMessage());
         verify(mentorshipRequestRepository, never()).save(any(MentorshipRequest.class));
+    }
+
+    private MentorshipRequest createMentorshipRequest(Long menteeId, Long mentorId,
+                                                      String description, RequestStatus status) {
+        MentorshipRequest request = new MentorshipRequest();
+        User mentee = new User();
+        mentee.setId(menteeId);
+        User mentor = new User();
+        mentor.setId(mentorId);
+        request.setRequester(mentee);
+        request.setReceiver(mentor);
+        request.setDescription(description);
+        request.setStatus(status);
+        return request;
+    }
+
+    @Test
+    void testGetRequests_NoFilters() {
+        List<MentorshipRequest> requests = List.of(
+                mentorshipRequest,
+                createMentorshipRequest(2L, 3L, "Help with Python.", RequestStatus.PENDING)
+        );
+
+        when(mentorshipRequestRepository.findAll()).thenReturn(requests);
+        when(mentorshipRequestMapper.toDto(any())).thenReturn(mentorshipRequestDto);
+
+        MentorshipRequestFilterDto filter = new MentorshipRequestFilterDto();
+        List<MentorshipRequestDto> result = mentorshipRequestService.getRequests(filter);
+
+        assertEquals(2, result.size());
+        verify(mentorshipRequestRepository, times(1)).findAll();
+    }
+
+    @Test
+    void testGetRequests_WithDescriptionFilter() {
+        List<MentorshipRequest> requests = List.of(
+                mentorshipRequest,
+                createMentorshipRequest(2L, 3L, "Help with Python.", RequestStatus.PENDING)
+        );
+
+        when(mentorshipRequestRepository.findAll()).thenReturn(requests);
+        when(mentorshipRequestMapper.toDto(any())).thenReturn(mentorshipRequestDto);
+
+        MentorshipRequestFilterDto filter = new MentorshipRequestFilterDto();
+        filter.setDescription("Java");
+
+        List<MentorshipRequestDto> result = mentorshipRequestService.getRequests(filter);
+
+        assertEquals(1, result.size());
+        assertEquals("Need guidance on Java.", result.get(0).getDescription());
+    }
+
+    @Test
+    void testGetRequests_WithMenteeIdFilter() {
+        List<MentorshipRequest> requests = List.of(
+                mentorshipRequest,
+                createMentorshipRequest(2L, 3L, "Help with Python.", RequestStatus.PENDING)
+        );
+
+        when(mentorshipRequestRepository.findAll()).thenReturn(requests);
+        when(mentorshipRequestMapper.toDto(any())).thenReturn(mentorshipRequestDto);
+
+        MentorshipRequestFilterDto filter = new MentorshipRequestFilterDto();
+        filter.setMenteeId(1L);
+
+        List<MentorshipRequestDto> result = mentorshipRequestService.getRequests(filter);
+
+        assertEquals(1, result.size());
+        assertEquals(1L, result.get(0).getMenteeId());
+    }
+
+    @Test
+    void testGetRequests_WithMentorIdFilter() {
+        List<MentorshipRequest> requests = List.of(
+                mentorshipRequest,
+                createMentorshipRequest(2L, 3L, "Help with Python.", RequestStatus.PENDING)
+        );
+
+        when(mentorshipRequestRepository.findAll()).thenReturn(requests);
+        when(mentorshipRequestMapper.toDto(any())).thenReturn(mentorshipRequestDto);
+
+        MentorshipRequestFilterDto filter = new MentorshipRequestFilterDto();
+        filter.setMentorId(2L);
+
+        List<MentorshipRequestDto> result = mentorshipRequestService.getRequests(filter);
+
+        assertEquals(1, result.size());
+        assertEquals(2L, result.get(0).getMentorId());
+    }
+
+    @Test
+    void testGetRequests_WithStatusFilter() {
+        List<MentorshipRequest> requests = List.of(
+                mentorshipRequest,
+                createMentorshipRequest(2L, 3L, "Help with Python.", RequestStatus.ACCEPTED)
+        );
+
+        when(mentorshipRequestRepository.findAll()).thenReturn(requests);
+        when(mentorshipRequestMapper.toDto(any())).thenAnswer(invocation -> {
+            MentorshipRequest request = invocation.getArgument(0);
+            MentorshipRequestDto dto = new MentorshipRequestDto();
+            dto.setMenteeId(request.getRequester().getId());
+            dto.setMentorId(request.getReceiver().getId());
+            dto.setDescription(request.getDescription());
+            dto.setStatus(request.getStatus());
+            return dto;
+        });
+
+        MentorshipRequestFilterDto filter = new MentorshipRequestFilterDto();
+        filter.setStatus(RequestStatus.PENDING);
+
+        List<MentorshipRequestDto> result = mentorshipRequestService.getRequests(filter);
+
+        assertEquals(1, result.size());
+        assertEquals(RequestStatus.PENDING, result.get(0).getStatus());
+    }
+
+    @Test
+    void testGetRequests_NoMatches() {
+        List<MentorshipRequest> requests = List.of(
+                mentorshipRequest,
+                createMentorshipRequest(2L, 3L, "Help with Python.", RequestStatus.ACCEPTED)
+        );
+
+        when(mentorshipRequestRepository.findAll()).thenReturn(requests);
+
+        MentorshipRequestFilterDto filter = new MentorshipRequestFilterDto();
+        filter.setDescription("C++");
+
+        List<MentorshipRequestDto> result = mentorshipRequestService.getRequests(filter);
+
+        assertTrue(result.isEmpty());
+        verify(mentorshipRequestRepository, times(1)).findAll();
+        verify(mentorshipRequestMapper, never()).toDto(any());
     }
 }

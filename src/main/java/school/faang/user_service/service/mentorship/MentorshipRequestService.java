@@ -3,7 +3,9 @@ package school.faang.user_service.service.mentorship;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import school.faang.user_service.dto.MentorshipRequestDto;
+import school.faang.user_service.dto.filter.MentorshipRequestFilterDto;
 import school.faang.user_service.entity.MentorshipRequest;
 import school.faang.user_service.entity.RequestStatus;
 import school.faang.user_service.entity.User;
@@ -12,6 +14,8 @@ import school.faang.user_service.repository.UserRepository;
 import school.faang.user_service.repository.mentorship.MentorshipRequestRepository;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -22,6 +26,7 @@ public class MentorshipRequestService {
     private final UserRepository userRepository;
     private final MentorshipRequestMapper mentorshipRequestMapper;
 
+    @Transactional
     public MentorshipRequestDto requestMentorship(MentorshipRequestDto mentorshipRequestDto) {
         // Проверка, что запрос на менторство не отправляется самому себе
         if (mentorshipRequestDto.getMenteeId().equals(mentorshipRequestDto.getMentorId())) {
@@ -56,6 +61,7 @@ public class MentorshipRequestService {
         return mentorshipRequestMapper.toDto(mentorshipRequest);
     }
 
+    @Transactional
     public void acceptMentorshipRequest(long requestId) {
         MentorshipRequest request = mentorshipRequestRepository.findById(requestId)
                 .orElseThrow(() -> new IllegalArgumentException("Запрос на менторство не найден."));
@@ -68,6 +74,7 @@ public class MentorshipRequestService {
         mentorshipRequestRepository.save(request);
     }
 
+    @Transactional
     public void rejectMentorshipRequest(long requestId, String rejectionReason) {
         MentorshipRequest request = mentorshipRequestRepository.findById(requestId)
                 .orElseThrow(() -> new IllegalArgumentException("Запрос на менторство не найден."));
@@ -79,5 +86,30 @@ public class MentorshipRequestService {
         request.setStatus(RequestStatus.REJECTED);
         request.setRejectionReason(rejectionReason);
         mentorshipRequestRepository.save(request);
+    }
+
+    @Transactional(readOnly = true)
+    public List<MentorshipRequestDto> getRequests(MentorshipRequestFilterDto filter) {
+        List<MentorshipRequest> allRequests = (List<MentorshipRequest>) mentorshipRequestRepository.findAll();
+
+        List<MentorshipRequestDto> filteredRequests = allRequests.stream()
+                .filter(request -> filter.getDescription() == null ||
+                        request.getDescription().contains(filter.getDescription()))
+                .filter(request -> filter.getMenteeId() == null ||
+                        Objects.equals(request.getRequester().getId(), filter.getMenteeId()))
+                .filter(request -> filter.getMentorId() == null ||
+                        Objects.equals(request.getReceiver().getId(), filter.getMentorId()))
+                .filter(request -> filter.getStatus() == null ||
+                        Objects.equals(request.getStatus(), filter.getStatus()))
+                .map(mentorshipRequestMapper::toDto)
+                .toList();
+
+        if (filteredRequests.isEmpty()) {
+            log.warn("Запросы на менторство не найдены по заданным фильтрам: {}", filter);
+        } else {
+            log.info("Найдено {} запросов на менторство по заданным фильтрам.", filteredRequests.size());
+        }
+
+        return filteredRequests;
     }
 }
