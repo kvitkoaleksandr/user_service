@@ -22,7 +22,7 @@ public class MentorshipRequestController {
         return mentorshipRequestService.requestMentorship(mentorshipRequest);
     }
 
-    @PostMapping("/{id}/accept")
+    @PostMapping("/{id}/accept") // Принять запрос на менторство
     public void acceptRequest(@PathVariable long id) {
         mentorshipRequestService.acceptMentorshipRequest(id);
     }
